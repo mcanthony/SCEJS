@@ -1,0 +1,132 @@
+<html>
+	<head>
+		<title>StormEngineC V2 Draft</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<script src="../SCEJS/SCE.class.js"></script>
+		<style>
+			body{
+				background:#66ACA4;
+				color:#FFF;
+			}
+		</style>
+	</head>
+	
+	<body>
+		
+		<canvas id="stormCanvas" width="512" height="512"></canvas> 
+		<script>
+			var sce = new SCE();
+			sce.initialize({"target": document.getElementById("stormCanvas")});
+			
+			
+			var project = new Project();	
+			sce.loadProject(project);
+			
+			var stage = new Stage();			
+			project.addStage(stage);
+			project.setActiveStage(stage);
+			
+			
+			
+			//*********
+			// CAMERA
+			//*********
+			var camera = new Node();
+			project.getActiveStage().addNode(camera);
+			project.getActiveStage().setActiveCamera(camera);
+			
+			// ComponentTransformTarget 
+			var comp_transformTarget = new ComponentTransformTarget();
+			camera.addComponent(comp_transformTarget);
+			
+			// ComponentControllerTransformTarget
+			var comp_controllerTransformTarget = new ComponentControllerTransformTarget();
+			camera.addComponent(comp_controllerTransformTarget);
+			
+			// ComponentProjection
+			var comp_projection = new ComponentProjection();
+			camera.addComponent(comp_projection);
+			
+			// ComponentScreenEffects
+			var comp_screenEffects = new ComponentScreenEffects();
+			camera.addComponent(comp_screenEffects);
+			comp_screenEffects.addSE(new SE_RGB());
+			  			
+			// ComponentKeyboardEvents
+			var comp_keyboardEvents = new ComponentKeyboardEvents();
+			camera.addComponent(comp_keyboardEvents);
+			comp_keyboardEvents.onkeydown = function(evt) {
+				if(String.fromCharCode(evt.keyCode) == "W")
+					comp_controllerTransformTarget.forward();
+				if(String.fromCharCode(evt.keyCode) == "S")
+					comp_controllerTransformTarget.backward();
+				if(String.fromCharCode(evt.keyCode) == "A")
+					comp_controllerTransformTarget.strafeLeft();
+				if(String.fromCharCode(evt.keyCode) == "D")
+					comp_controllerTransformTarget.strafeRight();
+			};
+			comp_keyboardEvents.onkeyup = function(evt) {
+				comp_controllerTransformTarget.stop();
+			};			
+			
+			// ComponentMouseEvents 
+			var comp_mouseEvents = new ComponentMouseEvents();
+			camera.addComponent(comp_mouseEvents);
+			comp_mouseEvents.onmousedown = function(evt) {
+				comp_controllerTransformTarget.mouseDown(evt);
+			};
+			comp_mouseEvents.onmouseup = function(evt) {
+				comp_controllerTransformTarget.mouseUp(evt);
+			};
+			comp_mouseEvents.onmousemove = function(evt) {
+				comp_controllerTransformTarget.mouseMove(evt);
+			};
+			comp_mouseEvents.onmousewheel = function(evt) {
+				comp_controllerTransformTarget.mouseWheel(evt);
+			};			
+			
+			
+			//*********
+			// BOX
+			//*********
+			var node = new Node();
+			project.getActiveStage().addNode(node);
+			
+			var mesh = new Mesh().loadBox();
+			
+			// ComponentTransform
+			var comp_transform = new ComponentTransform();
+			node.addComponent(comp_transform);
+			
+			// ComponentRenderer
+			var comp_renderer = new ComponentRenderer();
+			node.addComponent(comp_renderer);
+			comp_renderer.addVFP(new VFP_RGB(1));			
+			comp_renderer.setArg("vertexPos", (function(){return mesh.vertexArray;}).bind(this));
+			comp_renderer.setArg("vertexNormal", (function(){return mesh.normalArray;}).bind(this));
+			comp_renderer.setArg("vertexTexture", (function(){return mesh.textureArray;}).bind(this));
+			comp_renderer.setArg("vertexTextureUnit", (function(){return mesh.textureUnitArray;}).bind(this));
+			comp_renderer.setIndices((function(){return mesh.indexArray;}).bind(this));
+			comp_renderer.setArg("PMatrix", (function(){return project.getActiveStage().getActiveCamera().getComponent(Constants.COMPONENT_TYPES.PROJECTION).getMatrix().transpose().e;}).bind(this));
+			comp_renderer.setArg("cameraWMatrix", (function(){return project.getActiveStage().getActiveCamera().getComponent(Constants.COMPONENT_TYPES.TRANSFORM_TARGET).getMatrix().transpose().e;}).bind(this));
+			comp_renderer.setArgUpdatable("cameraWMatrix", true);
+			comp_renderer.setArg("nodeWMatrix", (function(){return node.getComponent(Constants.COMPONENT_TYPES.TRANSFORM).getMatrixPosition().transpose().e;}).bind(this));
+			comp_renderer.setArgUpdatable("nodeWMatrix", true);
+			comp_renderer.setArg("nodesSize", (function(){return 30.0;}).bind(this));
+			comp_renderer.setArg("texAlbedo", (function(){return mesh.vertexArray;}).bind(this));
+						
+			
+			var image = new Image();
+			image.onload = function() {
+				comp_renderer.setArg("texAlbedo", (function(){return image;}).bind(this));
+			};
+			image.src = "../demos/_RESOURCES/lena.jpg";
+			
+			
+			//*********
+			// RENDER STAGE
+			//*********
+			project.getActiveStage().render();
+		</script>
+	</body>
+</html>

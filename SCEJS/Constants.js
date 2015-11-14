@@ -1,0 +1,20 @@
+var Constants = {
+	"EVENT_TYPES": {
+		"KEY_DOWN": 0,
+		"KEY_UP": 1,
+		"MOUSE_DOWN": 2,
+		"MOUSE_UP": 3,
+		"MOUSE_MOVE": 4,
+		"MOUSE_WHEEL": 5
+	},
+	"COMPONENT_TYPES": {
+		"KEYBOARD_EVENTS": 0,
+		"MOUSE_EVENTS": 1,
+		"TRANSFORM": 2,
+		"TRANSFORM_TARGET": 3,
+		"CONTROLLER_TRANSFORM_TARGET": 4,
+		"PROJECTION": 5,
+		"RENDERER": 6,
+		"SCREEN_EFFECTS": 7
+	}
+};
